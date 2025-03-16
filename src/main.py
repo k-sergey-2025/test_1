@@ -1,13 +1,32 @@
 from fastapi import FastAPI, Depends
 
 from src.dependencies import get_token_header, get_query_token
-from User.router import router as user_router
-from item.items import router as item_router
+from src.User import router as user
+from src.item import items
+from src.internal import admin
 
-app = FastAPI(dependencies=[Depends(get_query_token)])
+from src.core.db import create_db_and_tables
 
-app.include_router(user_router)
-app.include_router(item_router)
+
+app = FastAPI()
+
+
+@app.on_event("startup")
+def on_startup():
+    create_db_and_tables()
+
+
+app.include_router(user.router)
+app.include_router(items.router)
+app.include_router(
+    admin.router,
+    prefix="/admin",
+    tags=["admin"],
+    dependencies=[Depends(get_token_header)],
+    responses={418: {"description": "I'm a teapot"}},
+)
+
+
 
 
 
