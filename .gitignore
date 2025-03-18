@@ -4,4 +4,6 @@ venv/
 env/
 ENV/
 
+.idea/
+
 database.db
